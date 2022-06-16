@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import ed25519
 import fnmatch
 import glob
+import io
 import json
 import logging
 import os
@@ -10,12 +12,13 @@ import re
 import sys
 from collections import defaultdict
 from hashlib import sha256
-from typing import Any, Callable, Iterator, TextIO, cast
+from typing import Any, Callable, Dict, Iterator, TextIO, cast
 
 import click
 
 import coin_info
 from coin_info import Coin, CoinBuckets, Coins, CoinsInfo, FidoApps, SupportInfo
+from trezorlib import protobuf
 
 try:
     import termcolor
@@ -580,6 +583,44 @@ def check_fido(apps: FidoApps) -> bool:
     return check_passed
 
 
+# ====== coindefs generators ======
+from trezorlib.messages import EthereumDefinitionType, EthereumNetworkInfo, EthereumTokenInfo
+import time
+
+FORMAT_VERSION = 1
+FORMAT_VERSION_BYTES = FORMAT_VERSION.to_bytes(2, "big")
+DATA_VERSION_BYTES = int(time.time()).to_bytes(4, "big")
+
+
+def eth_info_from_dict(coin: Coin, msg_type: EthereumNetworkInfo | EthereumTokenInfo) -> EthereumNetworkInfo | EthereumTokenInfo:
+    attributes: Dict[str, Any] = dict()
+    for field in msg_type.FIELDS.values():
+        val = coin.get(field.name)
+
+        if field.name in ("chain_id", "slip44"):
+            attributes[field.name] = int(val)
+        elif msg_type == EthereumTokenInfo and field.name == "address":
+            attributes[field.name] = coin.get("address_bytes")
+        else:
+            attributes[field.name] = val
+
+    proto = msg_type(**attributes)
+
+    return proto
+
+
+def serialize_eth_info(info: EthereumNetworkInfo | EthereumTokenInfo, data_type_num: EthereumDefinitionType) -> bytes:
+    ser = FORMAT_VERSION_BYTES
+    ser += data_type_num.to_bytes(1, "big")
+    ser += DATA_VERSION_BYTES
+
+    buf = io.BytesIO()
+    protobuf.dump_message(buf, info)
+    ser += buf.getvalue()
+
+    return ser
+
+
 # ====== click command handlers ======
 
 
@@ -865,6 +906,40 @@ def dump(
         indent = 4 if pretty else None
         json.dump(output, outfile, indent=indent, sort_keys=True)
         outfile.write("\n")
+
+
+@cli.command()
+@click.option("-n", "--networks-outfile", type=click.File(mode="w"), default="./eth_networks_defs.json")
+@click.option("-t", "--tokens-outfile", type=click.File(mode="w"), default="./eth_tokens_defs.json")
+@click.option("-k", "--privatekey", type=click.File(mode="r"), default="./keys/ethereum_definitions/eth_defs_hex", help="Private key (text, hex formated) to use to sign data")
+def coindefs(networks_outfile: TextIO, tokens_outfile: TextIO, privatekey: TextIO):
+    """Generate signed Ethereum definitions for python-trezor and others."""
+    with privatekey:
+        sign_key = ed25519.SigningKey(ed25519.from_ascii(privatekey.readline(), encoding="hex"))
+
+    def generate_defs(coins: Coins, out_file: TextIO, msg_type: EthereumNetworkInfo | EthereumTokenInfo, data_type_num: EthereumDefinitionType):
+        # generate definitions for networks
+        defs: Dict[str, Dict[str, str]] = {}
+        for coin in coins:
+            # TODO: don't compose such a long key - use inner fields for the parts of them
+            if data_type_num is EthereumDefinitionType.NETWORK:
+                key = f"eth:{coin['shortcut']}:{coin['chain_id']}:{coin['slip44']}"
+            elif data_type_num is EthereumDefinitionType.TOKEN:
+                key = f"erc20:{coin['chain']}:{coin['symbol']}:{coin['chain_id']}:{coin['address'][2:]}"
+
+            ser = serialize_eth_info(eth_info_from_dict(coin, msg_type), data_type_num)
+            sig = sign_key.sign(ser)
+            defs[key] = ser.hex() + sig.hex()
+
+        with out_file:
+            json.dump(defs, out_file, indent=4, sort_keys=True)
+            out_file.write("\n")
+
+
+    all_coins = coin_info.coin_info()
+    generate_defs(all_coins.eth, networks_outfile, EthereumNetworkInfo, EthereumDefinitionType.NETWORK)
+    generate_defs(all_coins.erc20, tokens_outfile, EthereumTokenInfo, EthereumDefinitionType.TOKEN)
+
 
 
 @cli.command()
