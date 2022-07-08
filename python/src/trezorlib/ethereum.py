@@ -14,11 +14,11 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
-import re
+import json, pathlib, re
 from typing import TYPE_CHECKING, Any, AnyStr, Dict, List, Optional, Tuple
 
 from . import exceptions, messages
-from .tools import expect, prepare_message_bytes, session
+from .tools import expect, UH_, prepare_message_bytes, session
 
 if TYPE_CHECKING:
     from .client import TrezorClient
@@ -141,6 +141,46 @@ def encode_data(value: Any, type_name: str) -> bytes:
     raise ValueError(f"Unsupported data type for direct field encoding: {type_name}")
 
 
+def get_ethereum_definitions(chain_id: Optional[int] = None, slip44: Optional[int] = None, token_address: Optional[str] = None) -> messages.EthereumEncodedDefinitions:
+    # TODO: make path configurable
+    DEFINITIONS_PATH = pathlib.Path(__file__).resolve().parent.parent.parent.parent / "common" / "tools"
+    NETWORKS_DEFS_JSON_FILENAME = "eth_networks_defs.json"
+    TOKENS_DEFS_JSON_FILENAME = "eth_tokens_defs.json"
+
+    IGNORE_DEFS_KEY_REGEX = "[^:]+"
+
+    def get_definition(regex_key : str, json_file_path : pathlib.Path) -> Optional[bytes]:
+        # search in keys
+        for k, v in json.loads(json_file_path.read_text()).items():
+            if re.search(regex_key, k, flags=re.IGNORECASE):
+                return decode_hex(v)
+
+        return None
+
+    msg = messages.EthereumEncodedDefinitions()
+
+    if chain_id is not None:
+        chain_id_key = f"{chain_id}"
+    else:
+        chain_id_key = IGNORE_DEFS_KEY_REGEX
+
+    key: str = ":" + chain_id_key + ":" + "{second_key}$"
+
+    # network keys are composed from:
+    # "eth:" + network shortcut + ":" + chain ID + ":" + slip44
+    if chain_id is not None or slip44 is not None:
+        slip44_key = f"{UH_(slip44)}" if slip44 is not None else IGNORE_DEFS_KEY_REGEX
+        msg.encoded_network = get_definition(key.format(second_key=slip44_key), DEFINITIONS_PATH / NETWORKS_DEFS_JSON_FILENAME)
+
+    # token keys are composed from:
+    # "erc20:" + network shortcut + ":" + token symbol + ":" chain ID + ":" + token address
+    if chain_id is not None and token_address is not None:
+        msg.encoded_token = get_definition(key.format(second_key=token_address[2:]), DEFINITIONS_PATH / TOKENS_DEFS_JSON_FILENAME)
+
+    return msg
+
+
+
 # ====== Client functions ====== #
 
 
@@ -187,6 +227,7 @@ def sign_tx(
         to=to,
         chain_id=chain_id,
         tx_type=tx_type,
+        definitions=get_ethereum_definitions(chain_id=chain_id, token_address=to),
     )
 
     if data is None:
@@ -246,6 +287,7 @@ def sign_tx_eip1559(
         access_list=access_list,
         data_length=length,
         data_initial_chunk=chunk,
+        definitions=get_ethereum_definitions(chain_id=chain_id, token_address=to),
     )
 
     response = client.call(msg)
@@ -269,7 +311,9 @@ def sign_message(
 ) -> "MessageType":
     return client.call(
         messages.EthereumSignMessage(
-            address_n=n, message=prepare_message_bytes(message)
+            address_n=n,
+            message=prepare_message_bytes(message),
+            encoded_network=get_ethereum_definitions(slip44=n[1]).encoded_network,
         )
     )
 

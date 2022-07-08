@@ -20,9 +20,9 @@ from .layout import (
 )
 
 if TYPE_CHECKING:
-    from collections import defaultdict
     from apps.common.keychain import Keychain
 
+    from .helpers import SimpleDefaultDict
     from .keychain import EthereumSignTxAny
 
 
@@ -95,7 +95,7 @@ async def sign_tx(
 
 
 async def handle_erc20(
-    ctx: wire.Context, msg: EthereumSignTxAny, token_dict: defaultdict[bytes, tokens.TokenInfo]
+    ctx: wire.Context, msg: EthereumSignTxAny, token_dict: SimpleDefaultDict[bytes, tokens.TokenInfo]
 ) -> tuple[tokens.TokenInfo | None, bytes, bytes, int]:
     token = None
     address_bytes = recipient = bytes_from_address(msg.to)

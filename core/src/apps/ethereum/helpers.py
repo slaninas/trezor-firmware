@@ -6,7 +6,12 @@ from trezor.enums import EthereumDataType
 from trezor.messages import EthereumFieldType
 
 if TYPE_CHECKING:
+    from typing import Callable, TypeVar
+
     from .networks import NetworkInfo
+
+    _KT = TypeVar("_KT")
+    _VT = TypeVar("_VT")
 
 
 def address_from_bytes(address_bytes: bytes, network: NetworkInfo | None = None) -> str:
@@ -124,3 +129,18 @@ def from_bytes_bigendian_signed(b: bytes) -> int:
         return -result - 1
     else:
         return int.from_bytes(b, "big")
+
+
+class SimpleDefaultDict(dict):
+    def __init__(self, __default_factory: Callable[[], _VT], *args: _VT, **kwargs: _VT):
+        self.__default_factory = __default_factory
+        super().__init__(*args, **kwargs)
+
+    def __getitem__(self, __key: _KT) -> _VT:
+        return super().__getitem__(__key)
+
+    # TODO: does not work!!!!!!!!!!!!!!!
+    def __missing__(self, __key: _KT) -> _VT:
+        if self.__default_factory is None:
+            raise KeyError(__key)
+        return self.__default_factory()
