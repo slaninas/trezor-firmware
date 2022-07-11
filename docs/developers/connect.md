@@ -1,5 +1,7 @@
 # Trezor Connect
 
+> This page was migrated from the old wiki, the content might be outdated.
+
 Trezor Connect is a JavaScript platform made by SatoshiLabs for an easy integration
 of Trezor device with third-party services (websites or
 applications).
@@ -19,10 +21,10 @@ Trezor connect can be implemented in:
 ## How Trezor Connect works
 
 *Full documentation of Trezor Connect and its methods is on this GitHub
-[page][]*
+[page]*
 
 After implementing Trezor Connect, a small file containing a declaration
-of methods is downloaded. Once the Trezor Connect [method][] is used,
+of methods is downloaded. Once the Trezor Connect [method] is used,
 the connection to the trezor.io external webpage is established and the
 Trezor Connect library is going to be downloaded and injected as an
 invisible iframe into your application. Trezor Connect is,

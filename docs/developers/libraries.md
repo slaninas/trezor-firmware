@@ -1,5 +1,7 @@
 # Libraries
 
+> This page was migrated from the old wiki, the content might be outdated.
+
 There are several libraries available which can be used to implement
 Trezor device functionalities.
 

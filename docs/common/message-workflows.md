@@ -1,3 +1,5 @@
+# Message Workflows
+
 In general, the API implements a simple request-response protocol. The
 computer sends a request to the device and the device sends back a
 response. The response can be a simple Success message, a Failure

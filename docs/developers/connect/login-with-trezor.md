@@ -4,7 +4,7 @@ Trezor Connect is a platform for easy integration of **Login with
 Trezor** into websites or applications.
 
 Note: more technical and less obsolete documentation of Trezor Connect
-API can be found [on GitHub][].
+API can be found [on GitHub].
 
 Add Trezor Login to Your Website or App
 
@@ -18,7 +18,7 @@ computer skills.
 
 Within the first 4 months since official release, the device was
 embraced by users in over 70 countries and greatly reviewed by security
-experts as [the most sophisticated authenticator device in the world][]
+experts as [the most sophisticated authenticator device in the world]
 
 ## How it works
 

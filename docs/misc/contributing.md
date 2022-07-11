@@ -35,8 +35,6 @@ on the type of the asset to be added:
     repository
 -   **NEM mosaics** should be added to the
     [common/defs/nem/nem_mosaics.json][] file
--   **other coins** should be added to the
-    [common/defs/misc/misc.json][] file
 
 ### Other
 
