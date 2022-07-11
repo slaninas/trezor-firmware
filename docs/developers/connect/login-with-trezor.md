@@ -1,5 +1,7 @@
 # Login with Trezor
 
+> This page was migrated from the old wiki, the content might be outdated.
+
 Trezor Connect is a platform for easy integration of **Login with
 Trezor** into websites or applications.
 
