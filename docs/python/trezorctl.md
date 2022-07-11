@@ -330,22 +330,22 @@ This is a power-user feature. Use with caution.
 
 Features (90 bytes) {
 
-`   device_id: '3B5328CA18BAE5F0553BCD3A',`  
-`   flags: 0,`  
-`   initialized: True,`  
-`   language: 'english',`  
-`   major_version: 2,`  
-`   minor_version: 1,`  
-`   model: 'T',`  
-`   needs_backup: False,`  
-`   no_backup: False,`  
-`   passphrase_cached: False,`  
-`   passphrase_protection: True,`  
-`   patch_version: 0,`  
-`   pin_cached: True,`  
-`   pin_protection: True,`  
-`   revision: 8 bytes b'3f0e3a33',`  
-`   unfinished_backup: False,`  
+`   device_id: '3B5328CA18BAE5F0553BCD3A',`
+`   flags: 0,`
+`   initialized: True,`
+`   language: 'english',`
+`   major_version: 2,`
+`   minor_version: 1,`
+`   model: 'T',`
+`   needs_backup: False,`
+`   no_backup: False,`
+`   passphrase_cached: False,`
+`   passphrase_protection: True,`
+`   patch_version: 0,`
+`   pin_cached: True,`
+`   pin_protection: True,`
+`   revision: 8 bytes b'3f0e3a33',`
+`   unfinished_backup: False,`
 `   vendor: 'trezor.io',`
 
 }
