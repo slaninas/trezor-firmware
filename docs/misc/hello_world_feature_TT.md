@@ -17,7 +17,7 @@ As already mentioned, to get something useful from Trezor, writing device logic 
 ### TLDR: [implementation in a single commit](https://github.com/trezor/trezor-firmware/commit/8a855b38e69bea64ba79ca704876cf4862a9ff79)
 
 ### 1. Communication part (protobuf)
-Communication between Trezor and the computer is handled by a protocol called `protobuf`. It allows for the creation of specific messages (containing clearly defined data) that will be exchanged. More details about this can be seen in [docs](common/communication/index.md).
+Communication between Trezor and the computer is handled by a protocol called `protobuf`. It allows for the creation of specific messages (containing clearly defined data) that will be exchanged. More details about this can be seen in [docs](../common/communication/index.md).
 
 Trezor on its own cannot send data to the computer, it can only react to a "request" message it recognizes and send a "response" message.
 Both of these messages will need to be specified, and both parts of communication will need to understand them.
