@@ -53,5 +53,3 @@
   - [TOIF Image Format](misc/toif.md)
 - [Developers guide](developers/index.md)
   - [Libraries](developers/libraries.md)
-  - [Trezor Connect](developers/connect.md)
-    - [Login with Trezor](developers/connect/login-with-trezor.md)
