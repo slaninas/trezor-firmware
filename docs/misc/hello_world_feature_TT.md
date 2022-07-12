@@ -5,7 +5,7 @@
 ## Overview
 This document shows the creation of a custom functionality (feature, application) on TT. It explains how to build both the Trezor (device, core) logic, as well as the client (computer, host, trezorlib) logic needed to speak with Trezor. For most new features, also the communication layer between Trezor and computer (protobuf) needs to be modified, to set up the messages they will exchange.
 
-Intermediate knowledge of `python` and `linux` environment is assumed here to easily follow along. For steps how to set up the Trezor dev environment, refer to other docs - [build](core/build/index.md) or [emulator](core/emulator/index.md). The most important part is being in the `poetry shell` of this project, so all dependencies are installed.
+Intermediate knowledge of `python` and `linux` environment is assumed here to easily follow along. For steps how to set up the Trezor dev environment, refer to other docs - [build](../core/build/index.md) or [emulator](../core/emulator/index.md). The most important part is being in the `poetry shell` of this project, so all dependencies are installed.
 
 ## Feature description
 We will implement a simple hello-world feature where Trezor gets some information from the host, will do something with it (optionally shows something on the screen), and returns some information back to the host, where we want to display them. (Note that there are no cryptographic operations involved in this example, it focuses only on basic communication between Trezor and host.)
